@@ -11,7 +11,6 @@ const args = process.argv.slice(2);
 const usernameArg = args.find(arg => arg.startsWith('--username='));
 const username = usernameArg?.split('=')[1] || 'Anonymous';
 
-// Start in user's home dir
 process.chdir(homedir());
 
 console.log(`Welcome to the File Manager, ${username}!`);
@@ -32,7 +31,6 @@ process.stdin.on('data', async (data) => {
 
   try {
     switch (command) {
-      // Navigation
       case 'up':
         up();
         break;
@@ -42,8 +40,6 @@ process.stdin.on('data', async (data) => {
       case 'ls':
         await ls();
         break;
-
-      // File operations
       case 'cat':
         await cat(args[0]);
         break;
@@ -65,18 +61,12 @@ process.stdin.on('data', async (data) => {
       case 'mkdir':
         await mkdir(args[0]);
         break;
-
-      // OS info
       case 'os':
         osCommand(args[0]);
         break;
-
-      // Hashing
       case 'hash':
         await hash(args[0]);
         break;
-
-      // Compression
       case 'compress':
         await compress(args[0], args[1]);
         break;
