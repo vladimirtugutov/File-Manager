@@ -81,30 +81,62 @@ export const cp = async (source, target) => {
 };
 
 export const mv = async (src, dest) => {
+  return new Promise(async (resolvePromise, rejectPromise) => {
     try {
       const sourcePath = resolve(src);
       let destinationPath = resolve(dest);
-  
-      try {
-        const destStat = await stat(destinationPath);
-        if (destStat.isDirectory()) {
-          destinationPath = join(destinationPath, basename(sourcePath));
-        }
-      } catch {
+
+      await access(sourcePath, constants.F_OK);
+
+      const destStat = await stat(destinationPath).catch(() => null);
+      if (destStat?.isDirectory()) {
+        destinationPath = join(destinationPath, basename(sourcePath));
       }
-  
-      await fs.promises.copyFile(sourcePath, destinationPath);
-      await fs.promises.unlink(sourcePath);
-      printCwd(process.cwd());
-    } catch {
+
+      const readStream = createReadStream(sourcePath);
+      const writeStream = createWriteStream(destinationPath);
+
+      readStream.on('error', (err) => {
+        handleError();
+        rejectPromise(err);
+      });
+
+      writeStream.on('error', (err) => {
+        handleError();
+        rejectPromise(err);
+      });
+
+      writeStream.on('finish', async () => {
+        try {
+          await fs.promises.unlink(sourcePath);
+          resolvePromise();
+        } catch (err) {
+          handleError();
+          rejectPromise(err);
+        }
+      });
+
+      readStream.pipe(writeStream);
+    } catch (err) {
       handleError();
+      rejectPromise(err);
     }
+  });
 };
 
 export const rm = async (path) => {
   try {
     await fs.promises.rm(path);
     printCwd(process.cwd());
+  } catch {
+    handleError();
+  }
+};
+
+export const write = async (filePath, content) => {
+  try {
+    const absPath = resolve(filePath);
+    await fs.promises.writeFile(absPath, content, 'utf-8');
   } catch {
     handleError();
   }
