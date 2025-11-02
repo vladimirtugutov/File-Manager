@@ -1,7 +1,6 @@
 import { chdir, cwd } from 'process';
 import { resolve, sep } from 'path';
 import { handleError } from '../utils/error.js';
-import { printCwd } from '../utils/printCwd.js';
 import fs from 'fs/promises';
 
 export const up = () => {
@@ -25,22 +24,27 @@ export const cd = async (path) => {
 };
 
 export const ls = async () => {
-  try {
-    const files = await fs.readdir(cwd(), { withFileTypes: true });
-    const dirs = [];
-    const regulars = [];
+  return new Promise(async (resolvePromise, rejectPromise) => {
+    try {
+      const files = await fs.readdir(cwd(), { withFileTypes: true });
+      const dirs = [];
+      const regulars = [];
 
-    for (const file of files) {
-      const entry = { Name: file.name, Type: file.isDirectory() ? 'directory' : 'file' };
-      file.isDirectory() ? dirs.push(entry) : regulars.push(entry);
+      for (const file of files) {
+        const entry = { Name: file.name, Type: file.isDirectory() ? 'directory' : 'file' };
+        file.isDirectory() ? dirs.push(entry) : regulars.push(entry);
+      }
+
+      dirs.sort((a, b) => a.Name.localeCompare(b.Name));
+      regulars.sort((a, b) => a.Name.localeCompare(b.Name));
+
+      const result = [...dirs, ...regulars];
+
+      console.table(result);
+      resolvePromise();
+    } catch (err) {
+      handleError();
+      rejectPromise(err);
     }
-
-    const result = [...dirs.sort((a, b) => a.Name.localeCompare(b.Name)),
-                    ...regulars.sort((a, b) => a.Name.localeCompare(b.Name))];
-
-    console.table(result);
-    printCwd(cwd());
-  } catch {
-    handleError();
-  }
+  });
 };

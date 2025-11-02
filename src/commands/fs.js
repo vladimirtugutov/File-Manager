@@ -3,7 +3,6 @@ import { stat, access, constants } from 'fs/promises';
 import { join, basename, dirname, resolve } from 'path';
 import { createReadStream, createWriteStream } from 'fs';
 import { handleError } from '../utils/error.js';
-import { printCwd } from '../utils/printCwd.js';
 
 export const cat = async (filePath) => {
   return new Promise((resolvePromise, rejectPromise) => {
