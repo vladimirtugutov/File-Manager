@@ -1,5 +1,5 @@
 import { up, cd, ls } from '../commands/nwd.js';
-import { cat, add, rn, cp, mv, rm, mkdir } from '../commands/fs.js';
+import { cat, add, rn, cp, mv, rm, mkdir, write } from '../commands/fs.js';
 import { osCommand } from '../commands/os.js';
 import { hash } from '../commands/hash.js';
 import { compress, decompress } from '../commands/zip.js';
@@ -47,6 +47,9 @@ export const handleCommand = async (command, args) => {
       break;
     case 'decompress':
       await decompress(args[0], args[1]);
+      break;
+    case 'write':
+      await write(args[0], args.slice(1).join(' '));
       break;
     default:
       console.log('Invalid input');
