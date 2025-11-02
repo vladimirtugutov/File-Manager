@@ -1,6 +1,7 @@
 {
   "name": "file-manager",
   "version": "1.0.0",
+  "type": "module",
   "description": "implementation of File Manager using Node.js APIs",
   "main": "index.js",
   "scripts": {
