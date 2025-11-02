@@ -58,30 +58,44 @@ export const rn = async (path, newName) => {
 };
 
 export const cp = async (source, target) => {
-  try {
-    const sourcePath = resolve(source);
-    let targetPath = resolve(target);
-
+  return new Promise(async (resolvePromise, rejectPromise) => {
     try {
-      const targetStats = await stat(targetPath);
-      if (targetStats.isDirectory()) {
-        targetPath = join(targetPath, basename(sourcePath));
+      const sourcePath = resolve(source);
+      let targetPath = resolve(target);
+
+      try {
+        const targetStats = await stat(targetPath);
+        if (targetStats.isDirectory()) {
+          targetPath = join(targetPath, basename(sourcePath));
+        }
+      } catch (err) {
       }
-    } catch {
+
+      await access(sourcePath, constants.F_OK);
+
+      const readStream = createReadStream(sourcePath);
+      const writeStream = createWriteStream(targetPath);
+
+      readStream.on('error', (err) => {
+        handleError();
+        rejectPromise(err);
+      });
+
+      writeStream.on('error', (err) => {
+        handleError();
+        rejectPromise(err);
+      });
+
+      writeStream.on('finish', () => {
+        resolvePromise();
+      });
+
+      readStream.pipe(writeStream);
+    } catch (err) {
+      handleError();
+      rejectPromise(err);
     }
-
-    await access(sourcePath, constants.F_OK);
-
-    const readStream = createReadStream(sourcePath);
-    const writeStream = createWriteStream(targetPath);
-
-    readStream.on('error', handleError);
-    writeStream.on('error', handleError);
-
-    readStream.pipe(writeStream);
-  } catch {
-    handleError();
-  }
+  });
 };
 
 export const mv = async (src, dest) => {
