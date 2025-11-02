@@ -49,40 +49,42 @@ export const mkdir = async (dirname) => {
 
 export const rn = async (path, newName) => {
   try {
-    const dir = dirname(path);
+    const absPath = resolve(path);
+    await access(absPath, constants.F_OK);
+    
+    const dir = dirname(absPath);
     const newPath = join(dir, newName);
-    await fs.promises.rename(path, newPath);
-    printCwd(process.cwd());
+    await fs.promises.rename(absPath, newPath);
   } catch {
     handleError();
   }
 };
 
 export const cp = async (source, target) => {
+  try {
+    const sourcePath = resolve(source);
+    let targetPath = resolve(target);
+
     try {
-      const sourcePath = resolve(source);
-      let targetPath = resolve(target);
-  
-      try {
-        const targetStats = await stat(targetPath);
-        if (targetStats.isDirectory()) {
-          targetPath = join(targetPath, basename(sourcePath));
-        }
-      } catch {
+      const targetStats = await stat(targetPath);
+      if (targetStats.isDirectory()) {
+        targetPath = join(targetPath, basename(sourcePath));
       }
-  
-      await access(sourcePath, constants.F_OK);
-  
-      const readStream = createReadStream(sourcePath);
-      const writeStream = createWriteStream(targetPath);
-  
-      readStream.on('error', handleError);
-      writeStream.on('error', handleError);
-  
-      readStream.pipe(writeStream);
     } catch {
-      handleError();
     }
+
+    await access(sourcePath, constants.F_OK);
+
+    const readStream = createReadStream(sourcePath);
+    const writeStream = createWriteStream(targetPath);
+
+    readStream.on('error', handleError);
+    writeStream.on('error', handleError);
+
+    readStream.pipe(writeStream);
+  } catch {
+    handleError();
+  }
 };
 
 export const mv = async (src, dest) => {
@@ -131,8 +133,9 @@ export const mv = async (src, dest) => {
 
 export const rm = async (path) => {
   try {
-    await fs.promises.rm(path);
-    printCwd(process.cwd());
+    const absPath = resolve(path);
+    await access(absPath, constants.F_OK);
+    await fs.promises.rm(absPath);
   } catch {
     handleError();
   }
