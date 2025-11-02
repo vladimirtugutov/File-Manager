@@ -11,7 +11,6 @@ export const up = () => {
     if (resolve(current) !== root) {
       chdir(resolve(current, '..'));
     }
-    printCwd(cwd());
   } catch {
     handleError();
   }
@@ -20,7 +19,6 @@ export const up = () => {
 export const cd = async (path) => {
   try {
     chdir(path);
-    printCwd(cwd());
   } catch {
     handleError();
   }

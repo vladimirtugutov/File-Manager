@@ -32,7 +32,6 @@ export const cat = async (filePath) => {
 export const add = async (filename) => {
   try {
     await fs.promises.writeFile(join(process.cwd(), filename), '');
-    printCwd(process.cwd());
   } catch {
     handleError();
   }
@@ -41,7 +40,6 @@ export const add = async (filename) => {
 export const mkdir = async (dirname) => {
   try {
     await fs.promises.mkdir(join(process.cwd(), dirname));
-    printCwd(process.cwd());
   } catch {
     handleError();
   }
