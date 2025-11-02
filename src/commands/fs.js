@@ -6,23 +6,28 @@ import { handleError } from '../utils/error.js';
 import { printCwd } from '../utils/printCwd.js';
 
 export const cat = async (filePath) => {
+  return new Promise((resolvePromise, rejectPromise) => {
     try {
       const absPath = resolve(filePath);
       const stream = createReadStream(absPath, { encoding: 'utf-8' });
-  
+
       stream.pipe(process.stdout);
-  
+
       stream.on('end', () => {
         console.log();
+        resolvePromise();
       });
-  
+
       stream.on('error', () => {
         handleError();
+        rejectPromise();
       });
     } catch {
       handleError();
+      rejectPromise();
     }
-  };
+  });
+};
 
 export const add = async (filename) => {
   try {
