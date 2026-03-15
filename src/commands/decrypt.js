@@ -1,31 +1,21 @@
 import { createReadStream, createWriteStream } from 'node:fs';
 import { access, stat, readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
 import { scrypt } from 'node:crypto';
 import { createDecipheriv } from 'node:crypto';
 import { pipeline } from 'node:stream/promises';
+import { parseArgs } from '../utils/argParser.js';
+import { resolvePath } from '../utils/pathResolver.js';
 
 export const decrypt = async (args, cwd) => {
-  const inputIndex = args.indexOf('--input');
-  const outputIndex = args.indexOf('--output');
-  const passwordIndex = args.indexOf('--password');
-
-  if (
-    inputIndex === -1 || outputIndex === -1 || passwordIndex === -1 ||
-    inputIndex + 1 >= args.length ||
-    outputIndex + 1 >= args.length ||
-    passwordIndex + 1 >= args.length
-  ) {
+  const parsed = parseArgs(args);
+  if (!parsed.input || !parsed.output || !parsed.password) {
     console.log('Invalid input');
     return;
   }
 
-  const inputFile = args[inputIndex + 1];
-  const outputFile = args[outputIndex + 1];
-  const password = args[passwordIndex + 1];
-
-  const inputPath = resolve(cwd, inputFile);
-  const outputPath = resolve(cwd, outputFile);
+  const inputPath = resolvePath(parsed.input, cwd);
+  const outputPath = resolvePath(parsed.output, cwd);
+  const password = parsed.password;
 
   try {
     await access(inputPath);
