@@ -1,0 +1,4 @@
+2026-03-15T10:00:00.000Z INFO user-service 200 123 GET /api/users
+2026-03-15T10:01:00.000Z WARN order-service 404 456 POST /api/orders
+2026-03-15T10:02:00.000Z ERROR payment-service 500 789 PUT /api/payments
+2026-03-15T10:03:00.000Z INFO user-service 200 234 GET /api/users
