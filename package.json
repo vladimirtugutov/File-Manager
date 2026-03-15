@@ -1,11 +1,11 @@
 {
-  "name": "file-manager",
+  "name": "data-processing-cli",
   "version": "1.0.0",
   "type": "module",
   "description": "implementation of File Manager using Node.js APIs",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/main.js"
   },
   "repository": {
     "type": "git",
