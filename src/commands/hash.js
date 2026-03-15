@@ -1,21 +1,18 @@
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { access, writeFile } from 'node:fs/promises';
-import { resolve, dirname, basename } from 'node:path';
+import { parseArgs } from '../utils/argParser.js';
+import { resolvePath } from '../utils/pathResolver.js';
 
 export const hash = async (args, cwd) => {
-  const inputIndex = args.indexOf('--input');
-  
-  if (inputIndex === -1 || inputIndex + 1 >= args.length) {
+  const parsed = parseArgs(args);
+  if (!parsed.input) {
     console.log('Invalid input');
     return;
   }
 
-  const inputFile = args[inputIndex + 1];
-  const inputPath = resolve(cwd, inputFile);
-  const algorithm = args.includes('--algorithm') 
-    ? args[args.indexOf('--algorithm') + 1] 
-    : 'sha256';
+  const inputPath = resolvePath(parsed.input, cwd);
+  const algorithm = parsed.algorithm || 'sha256';
   
   const supported = ['sha256', 'md5', 'sha512'];
   if (!supported.includes(algorithm)) {
@@ -44,7 +41,7 @@ export const hash = async (args, cwd) => {
     const result = `${algorithm}: ${hashObj.digest('hex')}`;
     console.log(result);
 
-    if (args.includes('--save')) {
+    if (parsed.saveHash) {
       const hashFile = `${inputPath}.${algorithm}`;
       await writeFile(hashFile, result.split(': ')[1] + '\n', 'utf8');
     }

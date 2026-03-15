@@ -1,20 +1,16 @@
 import { createReadStream } from 'node:fs';
-import { Transform } from 'node:stream';
 import { access } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { parseArgs } from '../utils/argParser.js';
+import { resolvePath } from '../utils/pathResolver.js';
 
 export const count = async (args, cwd) => {
-  console.log(args, cwd);
-  
-  const inputIndex = args.indexOf('--input');
-  
-  if (inputIndex === -1 || inputIndex + 1 >= args.length) {
+  const parsed = parseArgs(args);
+  if (!parsed.input) {
     console.log('Invalid input');
     return;
   }
 
-  const inputFile = args[inputIndex + 1];
-  const inputPath = resolve(cwd, inputFile);
+  const inputPath = resolvePath(parsed.input, cwd);
 
   try {
     await access(inputPath);

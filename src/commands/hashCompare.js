@@ -1,26 +1,20 @@
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { readFile, access } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { parseArgs } from '../utils/argParser.js';
+import { resolvePath } from '../utils/pathResolver.js';
 
 export const hashCompare = async (args, cwd) => {
-  const inputIndex = args.indexOf('--input');
-  const hashIndex = args.indexOf('--hash');
-  
-  if (inputIndex === -1 || hashIndex === -1 || 
-      inputIndex + 1 >= args.length || hashIndex + 1 >= args.length) {
+  const parsed = parseArgs(args);
+  if (!parsed.input || !parsed.hashFile) {
     console.log('Invalid input');
     return;
   }
 
-  const inputFile = args[inputIndex + 1];
-  const hashFile = args[hashIndex + 1];
-  const inputPath = resolve(cwd, inputFile);
-  const hashPath = resolve(cwd, hashFile);
+  const inputPath = resolvePath(parsed.input, cwd);
+  const hashPath = resolvePath(parsed.hashFile, cwd);
   
-  const algorithm = args.includes('--algorithm') 
-    ? args[args.indexOf('--algorithm') + 1] 
-    : 'sha256';
+  const algorithm = parsed.algorithm || 'sha256';
 
   const supported = ['sha256', 'md5', 'sha512'];
   if (!supported.includes(algorithm)) {
