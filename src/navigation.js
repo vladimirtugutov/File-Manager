@@ -8,6 +8,7 @@ export const up = () => {
   const root = resolve(current).split(sep)[0] + sep;
   
   if (parent !== root) {
+    chdir('..');
     global.repl.currentDir = parent;
   }
 };

@@ -1,12 +1,14 @@
 import { up, cd, ls } from './navigation.js';
 import { printCwd } from './utils/printCwd.js';
+import { csvToJson } from './commands/csvToJson.js';
 
 const repl = global.repl;
 
 const commands = {
   up,
   cd,
-  ls
+  ls,
+  'csv-to-json': csvToJson
 };
 
 const parseSimple = (input) => {
@@ -17,7 +19,9 @@ const parseSimple = (input) => {
   return { command, args };
 };
 
-export const handleInput = async (input) => {
+const handleInput = async (input) => {
+  // console.log('Input:', input);
+  
   if (input.trim() === '.exit') {
     repl.rl.close();
     return;
@@ -29,15 +33,17 @@ export const handleInput = async (input) => {
   }
 
   const { command, args } = parseSimple(input);
+  // console.log('Parsed:', command, args); // debug
 
-  if (!commands[command]) {
+  const cmdHandler = commands[command];
+  if (!cmdHandler) {
     console.log('Invalid input');
     repl.rl.prompt();
     return;
   }
 
   try {
-    await commands[command](args);
+    await cmdHandler(args, repl.currentDir);
   } catch {
     console.log('Operation failed');
   }
