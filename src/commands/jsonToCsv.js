@@ -1,21 +1,16 @@
 import { readFile, access, writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { parseArgs } from '../utils/argParser.js';
+import { resolvePath } from '../utils/pathResolver.js';
 
 export const jsonToCsv = async (args, cwd) => {
-  const inputIndex = args.indexOf('--input');
-  const outputIndex = args.indexOf('--output');
-  
-  if (inputIndex === -1 || outputIndex === -1 || 
-      inputIndex + 1 >= args.length || outputIndex + 1 >= args.length) {
+  const parsed = parseArgs(args);
+  if (!parsed.input || !parsed.output) {
     console.log('Invalid input');
     return;
   }
 
-  const inputFile = args[inputIndex + 1];
-  const outputFile = args[outputIndex + 1];
-
-  const inputPath = resolve(cwd, inputFile);
-  const outputPath = resolve(cwd, outputFile);
+  const inputPath = resolvePath(parsed.input, cwd);
+  const outputPath = resolvePath(parsed.output, cwd);
 
   try {
     await access(inputPath);
@@ -44,7 +39,12 @@ export const jsonToCsv = async (args, cwd) => {
     headers.join(','),
     ...records.map(record => 
       headers.map(header => {
-        const value = record[header] ?? '';
+        let value = record[header] ?? '';
+        
+        if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
+          value = value.slice(1, -1);
+        }
+        
         return `"${String(value).replace(/"/g, '""')}"`;
       }).join(',')
     )

@@ -1,4 +1,3 @@
-// src/utils/argParser.js
 export const parseArgs = (args) => {
   const result = {};
   
