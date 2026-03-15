@@ -1,22 +1,27 @@
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { access, writeFile } from 'node:fs/promises';
-import { resolve, dirname, basename } from 'node:path';
+import { readFile, access } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
-export const hash = async (args, cwd) => {
+export const hashCompare = async (args, cwd) => {
   const inputIndex = args.indexOf('--input');
+  const hashIndex = args.indexOf('--hash');
   
-  if (inputIndex === -1 || inputIndex + 1 >= args.length) {
+  if (inputIndex === -1 || hashIndex === -1 || 
+      inputIndex + 1 >= args.length || hashIndex + 1 >= args.length) {
     console.log('Invalid input');
     return;
   }
 
   const inputFile = args[inputIndex + 1];
+  const hashFile = args[hashIndex + 1];
   const inputPath = resolve(cwd, inputFile);
+  const hashPath = resolve(cwd, hashFile);
+  
   const algorithm = args.includes('--algorithm') 
     ? args[args.indexOf('--algorithm') + 1] 
     : 'sha256';
-  
+
   const supported = ['sha256', 'md5', 'sha512'];
   if (!supported.includes(algorithm)) {
     console.log('Operation failed');
@@ -25,6 +30,15 @@ export const hash = async (args, cwd) => {
 
   try {
     await access(inputPath);
+    await access(hashPath);
+  } catch {
+    console.log('Operation failed');
+    return;
+  }
+
+  let expectedHash;
+  try {
+    expectedHash = (await readFile(hashPath, 'utf8')).trim().toLowerCase();
   } catch {
     console.log('Operation failed');
     return;
@@ -41,12 +55,12 @@ export const hash = async (args, cwd) => {
       fileStream.on('error', reject);
     });
 
-    const result = `${algorithm}: ${hashObj.digest('hex')}`;
-    console.log(result);
-
-    if (args.includes('--save')) {
-      const hashFile = `${inputPath}.${algorithm}`;
-      await writeFile(hashFile, result.split(': ')[1] + '\n', 'utf8');
+    const actualHash = hashObj.digest('hex').toLowerCase();
+    
+    if (actualHash === expectedHash) {
+      console.log('OK');
+    } else {
+      console.log('MISMATCH');
     }
 
   } catch {
