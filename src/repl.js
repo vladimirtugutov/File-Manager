@@ -2,6 +2,7 @@ import { up, cd, ls } from './navigation.js';
 import { printCwd } from './utils/printCwd.js';
 import { csvToJson } from './commands/csvToJson.js';
 import { jsonToCsv } from './commands/jsonToCsv.js';
+import { count } from './commands/count.js';
 
 const repl = global.repl;
 
@@ -10,7 +11,8 @@ const commands = {
   cd,
   ls,
   'csv-to-json': csvToJson,
-  'json-to-csv': jsonToCsv
+  'json-to-csv': jsonToCsv,
+  count
 };
 
 const parseSimple = (input) => {
