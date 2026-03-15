@@ -7,6 +7,7 @@ import { hash } from './commands/hash.js';
 import { hashCompare } from './commands/hashCompare.js';
 import { encrypt } from './commands/encrypt.js';
 import { decrypt } from './commands/decrypt.js';
+import { logStats } from './commands/logStats.js';
 
 const repl = global.repl;
 
@@ -20,7 +21,8 @@ const commands = {
   hash,
   'hash-compare': hashCompare,  
   encrypt,
-  decrypt
+  decrypt,
+  'log-stats': logStats
 };
 
 const parseSimple = (input) => {
