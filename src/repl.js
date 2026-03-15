@@ -5,6 +5,8 @@ import { jsonToCsv } from './commands/jsonToCsv.js';
 import { count } from './commands/count.js';
 import { hash } from './commands/hash.js';
 import { hashCompare } from './commands/hashCompare.js';
+import { encrypt } from './commands/encrypt.js';
+import { decrypt } from './commands/decrypt.js';
 
 const repl = global.repl;
 
@@ -16,7 +18,9 @@ const commands = {
   'json-to-csv': jsonToCsv,
   count,
   hash,
-  'hash-compare': hashCompare
+  'hash-compare': hashCompare,  
+  encrypt,
+  decrypt
 };
 
 const parseSimple = (input) => {
