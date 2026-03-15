@@ -23,17 +23,20 @@ export const logStats = async (args, cwd) => {
   }
 
   const numWorkers = cpus().length;
+  console.log(`Using ${numWorkers} workers`);
   const chunks = await splitFileByLines(inputPath, numWorkers);
+  console.log(`${chunks.length} chunks created`);
 
-  const workers = chunks.map(chunk =>
-    new Worker(new URL('../workers/logWorker.js', import.meta.url), {
+  const workers = chunks.map((chunk, i) => {
+  console.log(`Starting worker ${i+1}/${chunks.length}: lines ${chunk.startLine}-${chunk.endLine}`);
+  return  new Worker(new URL('../workers/logWorker.js', import.meta.url), {
       workerData: { 
         inputPath: inputPath, 
         startLine: chunk.startLine, 
         endLine: chunk.endLine 
       }
     })
-  );
+  });
 
   const partialStats = await Promise.all(
     workers.map(worker =>
